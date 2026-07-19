@@ -19,6 +19,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ContactAdmin from "./pages/ContactAdmin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 // Suppress AbortError in development
 if (typeof window !== "undefined") {
@@ -88,6 +90,8 @@ function App() {
             <Route path="/search" element={<Layout><Search /></Layout>} />
             <Route path="/business/:id" element={<Layout><BusinessDetail /></Layout>} />
             <Route path="/contact-admin" element={<Layout><ContactAdmin /></Layout>} />
+            <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+            <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
 
             {/* Protected Routes */}
             <Route

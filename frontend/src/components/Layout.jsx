@@ -344,8 +344,12 @@ export const Layout = ({ children }) => {
             </div>
           </div>
           
-          <div className="border-t border-emerald-800 mt-8 pt-8 text-center text-sm text-emerald-300">
+          <div className="border-t border-emerald-800 mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-emerald-300">
             <p>&copy; {new Date().getFullYear()} Oyo Biz. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            </div>
           </div>
         </div>
       </footer>
