@@ -81,7 +81,30 @@ const Search = () => {
         const city = searchParams.get('city');
 
         if (q) {
-          queryBuilder = queryBuilder.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+          // Also match businesses whose CATEGORY or CITY name contains the
+          // search term (e.g. searching "restaurant" or "ibadan" should
+          // surface relevant businesses, not just ones with that word in
+          // their own name/description).
+          const safeQ = q.replace(/[,()]/g, ' ').trim();
+
+          const [{ data: matchingCategories }, { data: matchingCities }] = await Promise.all([
+            supabase.from('categories').select('id').ilike('name', `%${safeQ}%`),
+            supabase.from('cities').select('id').ilike('name', `%${safeQ}%`)
+          ]);
+
+          const orParts = [`name.ilike.%${safeQ}%`, `description.ilike.%${safeQ}%`];
+
+          const categoryIds = (matchingCategories || []).map((c) => c.id);
+          if (categoryIds.length > 0) {
+            orParts.push(`category_id.in.(${categoryIds.join(',')})`);
+          }
+
+          const cityIds = (matchingCities || []).map((c) => c.id);
+          if (cityIds.length > 0) {
+            orParts.push(`city_id.in.(${cityIds.join(',')})`);
+          }
+
+          queryBuilder = queryBuilder.or(orParts.join(','));
         }
         if (category && category !== 'all') {
           queryBuilder = queryBuilder.eq('category_id', category);
