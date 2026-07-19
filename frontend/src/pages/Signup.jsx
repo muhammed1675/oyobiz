@@ -57,6 +57,9 @@ const Signup = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState(null);
 
   const handleGoogleSignUp = async () => {
     setGoogleLoading(true);
@@ -137,7 +140,7 @@ const Signup = () => {
 
     try {
       const { data, error } = await signUp(email, password, fullName);
-      
+
       if (error) {
         let errorMsg = error.message || 'Failed to create account';
         if (errorMsg.includes('body stream') || errorMsg.includes('json')) {
@@ -148,84 +151,137 @@ const Signup = () => {
         toast.error(errorMsg);
         return;
       }
-      
-      // Create user profile with role
-      if (data?.user) {
-        try {
-          // CRITICAL FIX: Wait for profile creation to complete
-          const { data: profileData, error: profileError } = await supabase
-            .from('users')
-            .upsert({
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              role: role  // This sets the role correctly
-            }, { onConflict: 'id' })
-            .select()
-            .single();
 
-          if (profileError) {
-            console.error('Profile creation error:', profileError);
-          } else {
-            console.log('Profile created with role:', profileData?.role);
-          }
-
-          // If business owner, create the business
-          if (role === 'owner') {
-            const { data: newBusiness, error: bizError } = await supabase
-              .from('businesses')
-              .insert({
-                owner_id: data.user.id,
-                name: businessName,
-                category_id: selectedCategory,
-                city_id: selectedCity,
-                address: businessAddress,
-                phone: businessPhone,
-                website: hasWebsite === 'yes' ? websiteUrl : '',
-                description: businessDescription,
-                cac_number: cacNumber,
-                cac_document_url: cacDocumentUrl,
-                wants_website: wantsWebsite === 'yes',
-                status: 'pending',
-                approved: false
-              })
-              .select()
-              .single();
-
-            if (bizError) {
-              console.log('Business creation note:', bizError.message);
-            } else {
-              console.log('Business created:', newBusiness?.name);
-            }
-          }
-        } catch (profileErr) {
-          console.error('Profile/business setup error:', profileErr);
-        }
+      if (!data?.user) {
+        toast.error('Something went wrong creating your account. Please try again.');
+        return;
       }
-      
-      // Check if email confirmation is required
-      if (data?.user?.identities?.length === 0) {
-        toast.success('Account created! Check your email to confirm.');
-        navigate('/login');
+
+      if (data.session) {
+        // Email confirmation is disabled (or auto-confirmed) — we already have
+        // an active session, so finish setting up the account right away.
+        await finalizeAccount(data.user.id);
       } else {
-        toast.success('Account created successfully!');
-        
-        // CRITICAL FIX: Use the role variable directly instead of profile state
-        // This ensures correct redirect before AuthContext updates
-        if (role === 'owner') {
-          console.log('Redirecting to /owner (business dashboard)');
-          navigate('/owner', { replace: true });
-        } else if (role === 'admin') {
-          console.log('Redirecting to /admin');
-          navigate('/admin', { replace: true });
-        } else {
-          console.log('Redirecting to /dashboard (user dashboard)');
-          navigate('/dashboard', { replace: true });
-        }
+        // Email confirmation is required. Supabase has emailed a 6-digit code
+        // (via the Confirm signup template) — ask the user to enter it.
+        setPendingUserId(data.user.id);
+        setStep(3);
+        toast.success('Check your email for a 6-digit code to confirm your account');
       }
     } catch (err) {
       console.error('Signup error:', err);
       toast.error('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Creates the users-table profile (and business, if signing up as an owner).
+  // Must only run once there's an authenticated session, since RLS requires
+  // auth.uid() to match the row being inserted.
+  const finalizeAccount = async (userId) => {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          email: email,
+          full_name: fullName,
+          role: role
+        }, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+      } else {
+        console.log('Profile created with role:', profileData?.role);
+      }
+
+      if (role === 'owner') {
+        const { data: newBusiness, error: bizError } = await supabase
+          .from('businesses')
+          .insert({
+            owner_id: userId,
+            name: businessName,
+            category_id: selectedCategory,
+            city_id: selectedCity,
+            address: businessAddress,
+            phone: businessPhone,
+            website: hasWebsite === 'yes' ? websiteUrl : '',
+            description: businessDescription,
+            cac_number: cacNumber,
+            cac_document_url: cacDocumentUrl,
+            wants_website: wantsWebsite === 'yes',
+            status: 'pending',
+            approved: false
+          })
+          .select()
+          .single();
+
+        if (bizError) {
+          console.log('Business creation note:', bizError.message);
+        } else {
+          console.log('Business created:', newBusiness?.name);
+        }
+      }
+    } catch (profileErr) {
+      console.error('Profile/business setup error:', profileErr);
+    }
+
+    toast.success('Account created successfully!');
+
+    if (role === 'owner') {
+      navigate('/owner', { replace: true });
+    } else if (role === 'admin') {
+      navigate('/admin', { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
+  };
+
+  const handleVerifySignupOtp = async (e) => {
+    e.preventDefault();
+
+    if (!otpCode || otpCode.length !== 6) {
+      toast.error('Enter the 6-digit code from your email');
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: 'signup'
+      });
+
+      if (error) {
+        toast.error(error.message || 'Invalid or expired code');
+        return;
+      }
+
+      const userId = data?.user?.id || pendingUserId;
+      await finalizeAccount(userId);
+    } catch (err) {
+      console.error('Verify signup OTP error:', err);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleResendSignupOtp = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      if (error) {
+        toast.error(error.message || 'Could not resend code');
+      } else {
+        toast.success('New code sent — check your email');
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -241,10 +297,14 @@ const Signup = () => {
             </div>
           </Link>
           <h1 className="text-2xl font-bold text-stone-900">
-            {step === 1 ? 'Create Account' : 'Business Details'}
+            {step === 1 ? 'Create Account' : step === 2 ? 'Business Details' : 'Confirm Your Email'}
           </h1>
           <p className="text-stone-500 mt-2">
-            {step === 1 ? 'Join Oyo Biz today' : 'Tell us about your business'}
+            {step === 1
+              ? 'Join Oyo Biz today'
+              : step === 2
+              ? 'Tell us about your business'
+              : `Enter the code we sent to ${email}`}
           </p>
           
           {/* Step indicator for business owners */}
@@ -652,6 +712,57 @@ const Signup = () => {
                       </>
                     )}
                   </Button>
+                </div>
+              </form>
+            )}
+
+            {step === 3 && (
+              <form onSubmit={handleVerifySignupOtp} className="space-y-4" data-testid="signup-otp-form">
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <Input
+                      id="signup-otp-code"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="123456"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="pl-10 h-12 text-center text-lg tracking-[0.4em] font-semibold"
+                      required
+                      data-testid="signup-otp-input"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg"
+                  disabled={verifying}
+                  data-testid="signup-verify-otp-btn"
+                >
+                  {verifying ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Verify & Create Account
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex items-center justify-center text-sm pt-1">
+                  <button
+                    type="button"
+                    className="text-emerald-700 hover:text-emerald-600 font-medium disabled:text-stone-300"
+                    onClick={handleResendSignupOtp}
+                    disabled={loading}
+                  >
+                    Resend code
+                  </button>
                 </div>
               </form>
             )}
