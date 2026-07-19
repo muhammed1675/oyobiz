@@ -42,6 +42,7 @@ const UserDashboard = () => {
       });
     }
     fetchUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   const fetchUserData = async () => {

@@ -44,6 +44,7 @@ const BusinessDetail = () => {
     if (user) {
       checkFavorite();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user]);
 
   const fetchBusiness = async () => {

@@ -77,6 +77,7 @@ const OwnerDashboard = () => {
       updateProfile({ role: 'owner' }).catch(() => {});
     }
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   const fetchData = async () => {

@@ -23,6 +23,7 @@ const Login = () => {
     if (user && profile) {
       redirectBasedOnRole(profile.role);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, profile]);
 
   const redirectBasedOnRole = (role) => {
