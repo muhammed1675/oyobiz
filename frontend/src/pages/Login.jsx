@@ -1,30 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Loader2, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
-  const { signInWithOtp, signInWithGoogle, user, profile } = useAuth();
+  const [verifying, setVerifying] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const { signInWithOtp, verifyOtp, signInWithGoogle, user, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const codeInputRef = useRef(null);
 
   const from = location.state?.from?.pathname;
 
-  // Redirect if already logged in (covers both normal login and returning via magic link)
+  // Redirect if already logged in
   useEffect(() => {
     if (user && profile) {
       redirectBasedOnRole(profile.role);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, profile]);
+
+  useEffect(() => {
+    if (codeSent) {
+      codeInputRef.current?.focus();
+    }
+  }, [codeSent]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const redirectBasedOnRole = (role) => {
     if (from) {
@@ -46,36 +62,64 @@ const Login = () => {
         toast.error(result.error.message || 'Could not sign in with Google');
         setGoogleLoading(false);
       }
-      // On success, the browser redirects to Google, so no further action here.
     } catch (err) {
       toast.error('Something went wrong. Please try again.');
       setGoogleLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const sendCode = async () => {
     if (!email) {
       toast.error('Please enter your email');
       return;
     }
-
     setLoading(true);
-
     try {
       const result = await signInWithOtp(email);
-
       if (result.error) {
-        toast.error(result.error.message || 'Could not send login link');
+        toast.error(result.error.message || 'Could not send code');
       } else {
-        setLinkSent(true);
-        toast.success('Check your email for the login link');
+        setCodeSent(true);
+        setResendCooldown(30);
+        toast.success('Check your email for the 6-digit code');
       }
     } catch (err) {
       toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendCode = async (e) => {
+    e.preventDefault();
+    await sendCode();
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+    await sendCode();
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    if (!code || code.length !== 6) {
+      toast.error('Enter the 6-digit code from your email');
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const result = await verifyOtp(email, code);
+      if (result.error) {
+        toast.error(result.error.message || 'Invalid or expired code');
+      }
+      // On success, the useEffect above handles redirecting once
+      // `user`/`profile` update.
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -90,31 +134,73 @@ const Login = () => {
           </Link>
           <h1 className="text-2xl font-bold text-stone-900">Welcome Back</h1>
           <p className="text-stone-500 mt-2">
-            {linkSent
-              ? 'We sent you a login link'
-              : "We'll email you a link to sign in — no password needed"}
+            {codeSent
+              ? `Enter the code we sent to ${email}`
+              : "We'll email you a code to sign in — no password needed"}
           </p>
         </div>
 
         <Card className="border-stone-200 shadow-sm" data-testid="login-card">
           <CardContent className="pt-6">
-            {linkSent ? (
-              <div className="text-center py-4 space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-emerald-700 mx-auto" />
-                <p className="text-stone-700 font-medium">Check your inbox</p>
-                <p className="text-stone-500 text-sm">
-                  We sent a login link to <span className="font-medium">{email}</span>.
-                  Click it to sign in.
-                </p>
+            {codeSent ? (
+              <form onSubmit={handleVerify} className="space-y-4" data-testid="otp-form">
+                <div className="space-y-2">
+                  <div className="relative">
+                    <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                    <Input
+                      ref={codeInputRef}
+                      id="otp-code"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="123456"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="pl-10 h-12 text-center text-lg tracking-[0.4em] font-semibold"
+                      required
+                      data-testid="otp-input"
+                    />
+                  </div>
+                </div>
+
                 <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => setLinkSent(false)}
+                  type="submit"
+                  className="w-full h-12 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg"
+                  disabled={verifying}
+                  data-testid="verify-otp-btn"
                 >
-                  Use a different email
+                  {verifying ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Verify & Sign In
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
                 </Button>
-              </div>
+
+                <div className="flex items-center justify-between text-sm pt-1">
+                  <button
+                    type="button"
+                    className="text-stone-500 hover:text-stone-700"
+                    onClick={() => {
+                      setCodeSent(false);
+                      setCode('');
+                    }}
+                  >
+                    Use a different email
+                  </button>
+                  <button
+                    type="button"
+                    className="text-emerald-700 hover:text-emerald-600 font-medium disabled:text-stone-300 disabled:cursor-not-allowed"
+                    onClick={handleResend}
+                    disabled={resendCooldown > 0 || loading}
+                  >
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                  </button>
+                </div>
+              </form>
             ) : (
               <>
                 <Button
@@ -146,38 +232,38 @@ const Login = () => {
                   <div className="h-px bg-stone-200 flex-1" />
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12"
-                      required
-                      data-testid="email-input"
-                    />
+                <form onSubmit={handleSendCode} className="space-y-4" data-testid="login-form">
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-12"
+                        required
+                        data-testid="email-input"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg"
-                  disabled={loading}
-                  data-testid="login-submit"
-                >
-                  {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Continue
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg"
+                    disabled={loading}
+                    data-testid="login-submit"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        Send Code
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    )}
+                  </Button>
                 </form>
               </>
             )}

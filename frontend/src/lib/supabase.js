@@ -97,15 +97,40 @@ export const safeSignInWithGoogle = async () => {
   }
 };
 
-// Passwordless sign in: sends a magic link to the given email.
-// The user clicks the link and is redirected back into the app already signed in.
+// Passwordless sign in: emails the user a 6-digit code.
+// Requires the "Magic Link" email template in Supabase to include {{ .Token }}.
 export const safeSignInWithOtp = async (email) => {
   try {
     const result = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/login`
+        shouldCreateUser: true
       }
+    });
+
+    if (result.error) {
+      return {
+        data: null,
+        error: handleAuthError(result.error, false)
+      };
+    }
+
+    return { data: result.data, error: null };
+  } catch (err) {
+    return {
+      data: null,
+      error: handleAuthError(err, false)
+    };
+  }
+};
+
+// Verifies the 6-digit code the user received by email and signs them in.
+export const safeVerifyOtp = async (email, token) => {
+  try {
+    const result = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
     });
 
     if (result.error) {

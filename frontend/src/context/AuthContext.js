@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
-import { supabase, safeSignIn, safeSignUp, safeSignInWithOtp, safeSignInWithGoogle } from '../lib/supabase';
+import { supabase, safeSignIn, safeSignUp, safeSignInWithOtp, safeVerifyOtp, safeSignInWithGoogle } from '../lib/supabase';
 
 const AuthContext = createContext({});
 
@@ -149,6 +149,10 @@ export const AuthProvider = ({ children }) => {
     return await safeSignInWithOtp(email);
   };
 
+  const verifyOtp = async (email, token) => {
+    return await safeVerifyOtp(email, token);
+  };
+
   const signInWithGoogle = async () => {
     return await safeSignInWithGoogle();
   };
@@ -200,6 +204,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signInWithOtp,
+    verifyOtp,
     signInWithGoogle,
     signOut,
     updateProfile,
