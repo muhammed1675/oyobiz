@@ -43,7 +43,8 @@ import {
   XCircle,
   Clock,
   Eye,
-  Edit
+  Edit,
+  Star
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -134,6 +135,42 @@ const AdminDashboard = () => {
       fetchAllData();
     } catch (error) {
       toast.error('Failed to update status');
+    }
+  };
+
+  const isActivelyFeatured = (business) =>
+    Boolean(business.is_featured && business.featured_until && new Date(business.featured_until) > new Date());
+
+  const setFeatured = async (businessId, days) => {
+    try {
+      const featuredUntil = new Date();
+      featuredUntil.setDate(featuredUntil.getDate() + days);
+
+      const { error } = await supabase
+        .from('businesses')
+        .update({ is_featured: true, featured_until: featuredUntil.toISOString() })
+        .eq('id', businessId);
+
+      if (error) throw error;
+      toast.success(`Featured for ${days} days`);
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to feature business');
+    }
+  };
+
+  const unfeature = async (businessId) => {
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .update({ is_featured: false, featured_until: null })
+        .eq('id', businessId);
+
+      if (error) throw error;
+      toast.success('Removed from featured');
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to update business');
     }
   };
 
@@ -386,6 +423,7 @@ const AdminDashboard = () => {
                         <TableHead>Category</TableHead>
                         <TableHead>City</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Featured</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -407,6 +445,48 @@ const AdminDashboard = () => {
                           <TableCell>{business.category?.name}</TableCell>
                           <TableCell>{business.city?.name}</TableCell>
                           <TableCell>{getStatusBadge(business.status)}</TableCell>
+                          <TableCell>
+                            {isActivelyFeatured(business) ? (
+                              <div className="flex flex-col gap-1">
+                                <Badge className="bg-amber-100 text-amber-700 w-fit">
+                                  <Star className="w-3 h-3 mr-1 fill-amber-700" />
+                                  Featured
+                                </Badge>
+                                <span className="text-xs text-stone-400">
+                                  until {new Date(business.featured_until).toLocaleDateString()}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => unfeature(business.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => setFeatured(business.id, 7)}
+                                  data-testid={`feature-7d-${business.id}`}
+                                >
+                                  7d
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs"
+                                  onClick={() => setFeatured(business.id, 30)}
+                                  data-testid={`feature-30d-${business.id}`}
+                                >
+                                  30d
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               {business.status === 'pending' && (

@@ -63,7 +63,9 @@ const Home = () => {
         if (!isMounted) return;
         setCities(citiesData || []);
 
-        // Fetch featured businesses (approved only)
+        // Fetch featured businesses (approved only) — sponsored listings
+        // (is_featured + not yet expired) are prioritized, then filled out
+        // with the most recently approved businesses.
         const { data: businessesData } = await supabase
           .from('businesses')
           .select(`
@@ -73,9 +75,22 @@ const Home = () => {
             photos:business_photos(photo_url)
           `)
           .eq('status', 'approved')
-          .limit(6);
+          .order('created_at', { ascending: false })
+          .limit(12);
         if (!isMounted) return;
-        setFeaturedBusinesses(businessesData || []);
+
+        const isSponsored = (biz) =>
+          biz.is_featured && biz.featured_until && new Date(biz.featured_until) > new Date();
+
+        const sortedBusinesses = [...(businessesData || [])].sort((a, b) => {
+          const aSponsored = isSponsored(a);
+          const bSponsored = isSponsored(b);
+          if (aSponsored && !bSponsored) return -1;
+          if (!aSponsored && bSponsored) return 1;
+          return 0;
+        });
+
+        setFeaturedBusinesses(sortedBusinesses.slice(0, 6));
 
         // Get stats
         const { count: businessCount } = await supabase
@@ -312,7 +327,7 @@ const Home = () => {
                   className="group"
                   data-testid={`business-card-${business.id}`}
                 >
-                  <Card className="h-full overflow-hidden bg-white hover:shadow-lg transition-all duration-300">
+                  <Card className={`h-full overflow-hidden bg-white hover:shadow-lg transition-all duration-300 ${business.is_featured && business.featured_until && new Date(business.featured_until) > new Date() ? 'ring-2 ring-amber-400' : ''}`}>
                     <div className="aspect-video relative overflow-hidden bg-stone-200">
                       {business.photos?.[0]?.photo_url ? (
                         <img
@@ -329,6 +344,11 @@ const Home = () => {
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Verified
                       </Badge>
+                      {business.is_featured && business.featured_until && new Date(business.featured_until) > new Date() && (
+                        <Badge className="absolute top-3 right-3 bg-amber-500 text-white">
+                          Sponsored
+                        </Badge>
+                      )}
                     </div>
                     <CardContent className="p-5">
                       <h3 className="font-semibold text-lg text-stone-900 mb-2 group-hover:text-emerald-700 transition-colors">
