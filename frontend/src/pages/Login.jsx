@@ -120,7 +120,7 @@ const Login = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-12 border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg"
+                  className="w-full h-12 border-stone-300 text-stone-700 hover:bg-stone-50 hover:text-stone-700 rounded-lg"
                   onClick={handleGoogleSignIn}
                   disabled={googleLoading}
                   data-testid="google-signin-btn"

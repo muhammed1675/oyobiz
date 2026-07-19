@@ -273,7 +273,7 @@ const Signup = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-12 border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg mb-5"
+                  className="w-full h-12 border-stone-300 text-stone-700 hover:bg-stone-50 hover:text-stone-700 rounded-lg mb-5"
                   onClick={handleGoogleSignUp}
                   disabled={googleLoading}
                   data-testid="google-signup-btn"
