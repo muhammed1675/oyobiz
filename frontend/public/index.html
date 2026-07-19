@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#064E3B" />
+        
+        <title>Oyo Biz | #1 Business Directory for Oyo State & Ibadan</title>
+        <meta name="description" content="Looking for a business in Oyo State? Find verified companies, local services, and shops in Ibadan, Ogbomoso, and Oyo. The most trusted Oyo State business directory." />
+        <meta name="keywords" content="business in oyo state, businesses in ibadan, oyo state business directory, companies in oyo state, local services ibadan, verified businesses nigeria, ogbomoso business listing, iseyin directory" />
+        <meta name="author" content="Oyo Biz" />
+
+        <link rel="icon" type="image/png" href="https://intimate-ivory-9nf3vqbuiq.edgeone.app/Oyobiz.png" />
+        <link rel="apple-touch-icon" href="https://intimate-ivory-9nf3vqbuiq.edgeone.app/Oyobiz.png" />
+
+        <link rel="canonical" href="https://www.oyobiz.online/" />
+        <meta name="google-site-verification" content="YEzezTZwdufpBybTPC2kU7DNzoDe5_vMNHrBoPFT_n4" />
+
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Oyo Biz - The Leading Business Directory for Oyo State" />
+        <meta property="og:description" content="Connect with verified businesses across Oyo State. Search our directory for services, shopping, and technology in Ibadan and beyond." />
+        <meta property="og:url" content="https://www.oyobiz.online/" />
+        <meta property="og:site_name" content="Oyo Biz" />
+        <meta property="og:image" content="https://prime-emerald-clmvthsmtl.edgeone.app/Oyo-Biz-Image.jpg" />
+        <meta property="og:image:alt" content="Oyo Biz - Business Directory Search" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@YourTwitterHandle" />
+        <meta name="twitter:creator" content="@YourTwitterHandle" />
+        <meta name="twitter:title" content="Oyo Biz | Oyo State Business Directory" />
+        <meta name="twitter:description" content="Connect with trusted businesses in Oyo State, Nigeria. Register your business for free." />
+        <meta name="twitter:image" content="https://prime-emerald-clmvthsmtl.edgeone.app/Oyo-Biz-Image.jpg" />
+        <meta name="twitter:image:alt" content="Oyo Biz - Business Directory preview image" />
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Oyo Biz",
+          "url": "https://www.oyobiz.online/",
+          "description": "Business Directory for Oyo State, Nigeria",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.oyobiz.online/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+        </script>
+
+        <script>
+            (function() {
+                // Hide React error overlay for abort errors
+                var hideOverlay = function() {
+                    var overlays = document.querySelectorAll('iframe[style*="z-index"]');
+                    overlays.forEach(function(iframe) {
+                        try {
+                            var doc = iframe.contentDocument || iframe.contentWindow.document;
+                            var text = doc.body ? doc.body.innerText : '';
+                            if (text.includes('abort') || text.includes('Abort') || text.includes('signal')) {
+                                iframe.style.display = 'none';
+                            }
+                        } catch(e) {}
+                    });
+                    
+                    // Also hide the overlay container
+                    var containers = document.querySelectorAll('[id*="webpack-dev-server"], [class*="error-overlay"]');
+                    containers.forEach(function(el) {
+                        if (el.innerText && (el.innerText.includes('abort') || el.innerText.includes('Abort') || el.innerText.includes('signal'))) {
+                            el.style.display = 'none';
+                        }
+                    });
+                };
+                
+                // Run periodically to catch any overlays
+                setInterval(hideOverlay, 100);
+                
+                // Suppress AbortError from React error overlay
+                window.addEventListener('error', function(e) {
+                    if (e.message && (e.message.includes('abort') || e.message.includes('Abort') || e.message.includes('signal'))) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        hideOverlay();
+                        return false;
+                    }
+                }, true);
+                
+                window.addEventListener('unhandledrejection', function(e) {
+                    var msg = (e.reason && e.reason.message) || (e.reason && e.reason.toString()) || '';
+                    if (msg.includes('abort') || msg.includes('Abort') || msg.includes('signal')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        hideOverlay();
+                        return false;
+                    }
+                }, true);
+                
+                // Patch console.error
+                var origError = console.error;
+                console.error = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    var msg = args.map(function(a) { return a && a.toString ? a.toString() : ''; }).join(' ');
+                    if (msg.includes('abort') || msg.includes('Abort') || msg.includes('signal')) {
+                        hideOverlay();
+                        return;
+                    }
+                    return origError.apply(console, args);
+                };
+            })();
+        </script>
+        
+        <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <script>
+            // Only load visual edit scripts when inside an iframe
+            if (window.self !== window.top) {
+                // Load debug monitor script
+                var debugMonitorScript = document.createElement('script');
+                debugMonitorScript.src = 'https://assets.emergent.sh/scripts/debug-monitor.js';
+                document.head.appendChild(debugMonitorScript);
+
+                // Configure Tailwind
+                window.tailwind = window.tailwind || {};
+                tailwind.config = {
+                    corePlugins: { preflight: false },
+                };
+
+                // Load Tailwind CDN
+                var tailwindScript = document.createElement('script');
+                tailwindScript.src = 'https://cdn.tailwindcss.com';
+                document.head.appendChild(tailwindScript);
+            }
+        </script>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <div id="root"></div>
+        <script>
+            !(function (t, e) {
+                var o, n, p, r;
+                e.__SV ||
+                    ((window.posthog = e),
+                    (e._i = []),
+                    (e.init = function (i, s, a) {
+                        function g(t, e) {
+                            var o = e.split(".");
+                            2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                                (t[e] = function () {
+                                    t.push(
+                                        [e].concat(
+                                            Array.prototype.slice.call(
+                                                arguments,
+                                                0,
+                                            ),
+                                        ),
+                                    );
+                                });
+                        }
+                        ((p = t.createElement("script")).type =
+                            "text/javascript"),
+                            (p.crossOrigin = "anonymous"),
+                            (p.async = !0),
+                            (p.src =
+                                s.api_host.replace(
+                                    ".i.posthog.com",
+                                    "-assets.i.posthog.com",
+                                ) + "/static/array.js"),
+                            (r =
+                                t.getElementsByTagName(
+                                    "script",
+                                )[0]).parentNode.insertBefore(p, r);
+                        var u = e;
+                        for (
+                            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                                u.people = u.people || [],
+                                u.toString = function (t) {
+                                    var e = "posthog";
+                                    return (
+                                        "posthog" !== a && (e += "." + a),
+                                        t || (e += " (stub)"),
+                                        e
+                                    );
+                                },
+                                u.people.toString = function () {
+                                    return u.toString(1) + ".people (stub)";
+                                },
+                                o =
+                                    "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId".split(
+                                        " ",
+                                    ),
+                                n = 0;
+                            n < o.length;
+                            n++
+                        )
+                            g(u, o[n]);
+                        e._i.push([i, s, a]);
+                    }),
+                    (e.__SV = 1));
+            })(document, window.posthog || []);
+            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+                api_host: "https://us.i.posthog.com",
+                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
+                session_recording: {
+                    recordCrossOriginIframes: true,
+                },
+            });
+        </script>
+    </body>
+</html>

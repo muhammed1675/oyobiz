@@ -1,0 +1,126 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Oyo Biz",
+      "archetype": "Organic & Earthy (Modern African)",
+      "vibe": "Trustworthy, Vibrant, Growth-oriented, Locally Rooted",
+      "theme_strategy": "Light Mode Default (Trust/Clarity) with Dark Mode Toggle"
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Plus Jakarta Sans, sans-serif",
+        "body": "DM Sans, sans-serif",
+        "accent": "Bricolage Grotesque, sans-serif"
+      },
+      "scale": {
+        "h1": "text-5xl md:text-7xl font-bold tracking-tight leading-tight",
+        "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+        "h3": "text-2xl md:text-3xl font-semibold",
+        "body_lg": "text-lg md:text-xl leading-relaxed",
+        "body_base": "text-base leading-relaxed text-muted-foreground",
+        "caption": "text-sm font-medium tracking-wide uppercase text-muted-foreground"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&family=Bricolage+Grotesque:wght@400;600;800&display=swap"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "DEFAULT": "#064E3B",
+          "foreground": "#FFFFFF",
+          "description": "Deep Emerald - Represents Growth and Wealth"
+        },
+        "secondary": {
+          "DEFAULT": "#C2410C",
+          "foreground": "#FFFFFF",
+          "description": "Terracotta/Rust - Homage to Ibadan's Brown Roofs"
+        },
+        "accent": {
+          "DEFAULT": "#84CC16",
+          "foreground": "#0F172A",
+          "description": "Vibrant Lime - Energy and Modernity"
+        },
+        "background": {
+          "DEFAULT": "#FAFAF9",
+          "dark": "#0C0A09",
+          "description": "Warm Stone - Approachable and Organic"
+        },
+        "surface": {
+          "DEFAULT": "#FFFFFF",
+          "dark": "#1C1917",
+          "description": "Clean White for Cards"
+        },
+        "muted": {
+          "DEFAULT": "#F5F5F4",
+          "foreground": "#78716C"
+        }
+      },
+      "gradients": {
+        "hero": "bg-gradient-to-br from-emerald-900 via-emerald-800 to-stone-900",
+        "card_hover": "hover:bg-gradient-to-br hover:from-white hover:to-stone-50",
+        "text_highlight": "bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-lime-600"
+      }
+    },
+    "spacing": {
+      "container_padding": "px-6 md:px-12 lg:px-24",
+      "section_gap": "py-20 md:py-32",
+      "element_gap": "gap-6 md:gap-8"
+    },
+    "visual_enhancers": {
+      "radius": "rounded-xl",
+      "shadows": {
+        "card": "shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] transition-all duration-300",
+        "floating": "shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+      },
+      "borders": "border border-stone-200 dark:border-stone-800",
+      "glassmorphism": "bg-white/80 backdrop-blur-md border-white/20 shadow-sm"
+    },
+    "layout_strategies": {
+      "marketing_hero": "Tetris Grid: Asymmetric layout mixing Mapo Hall landmark with business portraits.",
+      "directory_grid": "Bento Grid: Clean, card-based layout for categories and listings. Use 'masonry' feel where possible.",
+      "dashboard": "High Density Grid: Sidebar navigation + dense data widgets."
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 rounded-full font-medium transition-transform active:scale-95",
+        "secondary": "bg-white border border-stone-200 text-stone-900 hover:bg-stone-50 h-12 px-8 rounded-full font-medium",
+        "ghost": "hover:bg-stone-100 text-stone-600 hover:text-stone-900"
+      },
+      "cards": {
+        "listing": "bg-white p-6 rounded-xl border border-stone-100 hover:border-emerald-100 transition-colors group cursor-pointer",
+        "category": "aspect-square flex flex-col items-center justify-center bg-stone-50 hover:bg-emerald-50/50 border border-transparent hover:border-emerald-200 transition-all rounded-2xl"
+      },
+      "inputs": {
+        "default": "h-12 bg-stone-50 border-stone-200 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-lg"
+      }
+    },
+    "assets": {
+      "images": {
+        "hero_landmark": "https://images.unsplash.com/photo-1646459273756-1337637ea7ce?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "business_owner_1": "https://images.unsplash.com/photo-1665495005618-6f55e5f77a07?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "business_owner_2": "https://images.unsplash.com/photo-1666866850021-a843a45479af?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "cafe_interior": "https://images.unsplash.com/photo-1767418238663-d79db1fb7f78?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "office_vibe": "https://images.unsplash.com/photo-1763194894922-481175fd2264?crop=entropy&cs=srgb&fm=jpg&q=85"
+      },
+      "icons": "Use 'lucide-react' for UI icons. Use 'react-icons/pi' (Phosphor) for feature icons if needed."
+    },
+    "universal_guidelines": [
+      "Use 'sonner' for toasts.",
+      "Use 'lucide-react' for icons.",
+      "Ensure all interactive elements have 'data-testid'.",
+      "Do not use generic 'Inter' font for headings.",
+      "Avoid full-screen gradients; use subtle textures or noise if possible.",
+      "Mobile-first responsive design is mandatory.",
+      "Use 'clsx' and 'tailwind-merge' for class management."
+    ]
+  },
+  "instructions_to_main_agent": {
+    "step_1": "Install dependencies: `npm install lucide-react sonner clsx tailwind-merge @radix-ui/react-slot class-variance-authority`",
+    "step_2": "Update `tailwind.config.js` with the new color palette and font families.",
+    "step_3": "Update `index.css` to import the Google Fonts and set base styles.",
+    "step_4": "Create the `Layout` component with the Navbar and Footer using the 'Glassmorphism' style for the Nav.",
+    "step_5": "Build the Home Page using the 'Tetris Grid' for the Hero section.",
+    "step_6": "Implement the Directory/Search page with the 'Bento Grid' for listings."
+  }
+}
